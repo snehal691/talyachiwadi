@@ -1,0 +1,534 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  top: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.nav-container {
+  max-width: 1200px;
+  width: 88%;
+  height: 70px;                 /* Slim fixed height */
+  padding: 0 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  /* Glass effect */
+  background: rgba(19, 42, 19, 0.65);   /* Your #132a13 with transparency */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+
+/* LOGO */
+.logo img {
+  height: 55px;       /* Bigger logo */
+  width: auto;
+  display: block;
+}
+
+/* NAV LINKS */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.nav-links li {
+  padding: 0;        /* Remove extra height */
+}
+.nav-links a {
+  position: relative;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: 0.3s ease;
+}
+
+/* Gold underline animation */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  left: 0;
+  bottom: -6px;
+  background: linear-gradient(90deg, #ecf39e, #90a955);
+  transition: 0.4s ease;
+  border-radius: 2px;
+}
+
+/* BOOK NOW BUTTON */
+.farm-btn {
+  background: #ecf39e;
+  color: #132a13;
+  padding: 8px 22px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.farm-btn:hover {
+  background: #90a955;
+  color: white;
+}
+
+/* DROPDOWN */
+.dropdown {
+  position: relative;   /* For submenu positioning */
+}
+.submenu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(15px);
+
+  width: 240px;
+  padding: 15px 0;
+  list-style: none;
+
+  /* ✨ GLASS EFFECT */
+  background: rgba(19, 42, 19, 0.55);   /* transparent green */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+
+  z-index: 9999; 
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease; 
+}
+
+.submenu li {
+  padding: 10px 20px;
+}
+
+.submenu li a {
+  font-size: 14px;
+  color: #fffdfd;
+}
+
+.submenu li:hover {
+  background:  #055310;
+}
+
+/* SHOW ON HOVER */
+.dropdown:hover .submenu {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+.activity-card {
+  background: #4f772d;
+  padding: 30px;
+  margin: 30px auto;
+  max-width: 700px;
+  border-radius: 20px;
+  color: #ecf39e;
+  transition: 0.3s;
+}
+
+.activity-card:hover {
+  transform: translateY(-5px);
+  background: #4f772d;
+}
+
+/* HERO SECTION  */
+.activity-hero {
+  height: 60vh;
+  position: relative;
+  background: url('/img/skywalkbg.jpg') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-hero h1 {
+  color: white;
+  font-size: 60px;
+  background: rgba(0,0,0,0.4);
+  padding: 15px 40px;
+  border-radius: 10px;
+}
+
+
+/* INFO SECTION */
+.activity-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 90px 10%;
+  background: #ecf39e;
+  gap: 60px;
+}
+
+
+.info-right strong {
+  color: #ecf39e;
+}
+
+.info-left {
+  flex: 2;
+}
+
+.info-left p {
+  margin-bottom: 22px; 
+  line-height: 1.8;
+  font-size: 16px;
+  color: #132a13;
+}
+.info-left h2 {
+  font-size: 36px;
+  margin-bottom: 30px;
+  color: #132a13;
+}
+
+.info-right {
+  flex: 1;
+  background: #31572c;
+  color: white;
+  padding: 35px 30px;   /* more inner space */
+  border-radius: 18px;
+  line-height: 1.8;     /* line gap */
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.info-right p {
+  margin-bottom: 18px;
+  font-size: 16px;
+}
+
+.info-right strong {
+  color: #ecf39e;
+}
+
+/* MAIN ACTIVITES SECTION */
+.activity-section {
+  padding: 80px 20px;
+  background: #ecf39e;
+}
+
+.light-bg {
+  background: #90a955;
+}
+.activity-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+
+
+
+
+.school-section{
+padding:100px 10%;
+background:#ffffff;
+}
+
+.school-container{
+display:flex;
+align-items:center;
+gap:60px;
+}
+
+/* IMAGE */
+.school-image{
+flex:1;
+}
+
+.school-image img{
+width:100%;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* CONTENT */
+.school-content{
+flex:1;
+}
+
+.school-content h2{
+font-size:40px;
+color:#1c3d2b;
+margin-bottom:20px;
+font-family:'Cinzel', serif;
+}
+
+.school-content p{
+font-size:17px;
+line-height:1.8;
+color:#555;
+margin-bottom:25px;
+font-family:'Poppins', sans-serif;
+}
+
+/* LIST */
+.school-list{
+list-style:none;
+margin-bottom:30px;
+}
+
+.school-list li{
+margin-bottom:10px;
+font-size:16px;
+color:#333;
+}
+
+/* BUTTON */
+.school-btn{
+display:inline-block;
+padding:12px 25px;
+background:#1c3d2b;
+color:white;
+border-radius:30px;
+text-decoration:none;
+transition:0.3s;
+}
+
+.school-btn:hover{
+background:#2d6a4f;
+}
+
+
+
+
+
+
+.activity-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.activity-text {
+  flex: 1;
+}
+.activity-container.reverse {
+  flex-direction: row-reverse;
+}
+
+.reverse {
+  flex-direction: row-reverse;
+}
+
+.activity-image img {
+  width: 100%;
+  max-width: 600px;     /* increased more */
+  height: 420px;        /* bigger height */
+  object-fit: cover;
+  border-radius: 25px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  transition: 0.4s ease;
+}
+
+.activity-image img:hover {
+  transform: scale(1.03);
+}
+
+
+.activity-text h2 {
+  font-size: 38px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 25px;
+  color: #132a13;
+ 
+}
+
+.activity-text p {
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.activity-text ul {
+  margin-bottom: 20px;
+}
+
+.activity-text ul li {
+  margin-bottom: 8px;
+}
+
+.activity-btn {
+  padding: 10px 25px;
+  background: #132a13;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.activity-btn:hover {
+  background: #31572c;
+}
+
+  /* GALLERY */
+
+.activities-gallery {
+  padding: 80px 10%;
+  background: #132a13;
+  text-align: center;
+}
+
+.activities-gallery h2 {
+  color: #ecf39e;
+  margin-bottom: 40px;
+}
+
+/* Carousel layout */
+.carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.carousel-window {
+  height: 500px;
+  width: 1200px; /* EXACTLY 3 images */
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+/* Images */
+.carousel-track img {
+  width: 300px;
+  height: 500px;
+  object-fit: cover;
+  margin: 0 10px;
+  opacity: 0.5;
+  transform: scale(0.85);
+  transition: 0.4s;
+  border-radius: 15px;
+}
+
+/* Center image */
+.carousel-track img.active {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+
+/* Arrows */
+.arrow {
+  background: #90a955;
+  border: none;
+  font-size: 26px;
+  padding: 12px 18px;
+  cursor: pointer;
+  border-radius: 50%;
+  color: #132a13;
+}
+
+.arrow:hover {
+  background: #ecf39e;
+}
+
+.arrow.left { margin-right: 20px; }
+.arrow.right { margin-left: 20px; }
+
+/* Buttons */
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    color:  #055310;
+    border: none;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-size: 20px;
+    border-radius: 50%;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+.prev:hover, .next:hover {
+    background: #0b7a1a;
+}
+
+
+ @media (max-width: 768px) {
+
+  .activity-hero {
+    height: 40vh;
+  }
+
+  .activity-hero h1 {
+    font-size: 32px;
+    padding: 10px 20px;
+  }
+
+  .activity-info {
+    flex-direction: column;
+    padding: 60px 20px;
+    gap: 30px;
+  }
+
+  .info-left,
+  .info-right {
+    width: 100%;
+  }
+
+  .info-left h2 {
+    font-size: 28px;
+  }
+  .activity-container,
+  .activity-container.reverse {
+    flex-direction: column;
+    text-align: center;
+    gap: 30px;
+  }
+
+  .activity-image img {
+    height: 280px;
+    max-width: 100%;
+  }
+
+  .activity-text h2 {
+    font-size: 26px;
+  }
+  .activities-gallery {
+    padding: 60px 20px;
+  }
+
+  .carousel-window {
+    width: 100%;
+    height: 300px;
+  }
+
+  .carousel-track img {
+    width: 200px;
+    height: 300px;
+  }
+}        
+
