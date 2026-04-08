@@ -22,14 +22,15 @@ const adminSchema = new Schema({
     role: {
         type: String,
         enum: ['admin', 'user', 'developer'],
+        default: 'user',
         required: true
     },
     password: {
         type: String,
         required: [true, "Password is required"],
         trim: true,
-        min: 8,
-        max: 20,
+        minLength: 8,
+        maxLength: 20,
     },
     refreshToken: {
         type: String
