@@ -8,10 +8,10 @@ const dbConnect = async () => {
             appName: process.env.MONGODB_APP_NAME
         });
         console.log(`MongoDB Connected: ${conn.connection.host}`);
-        connectionStatus = "Running";
+        connectionStatus = "running";
     } catch (err) {
         console.log("Error while connecting to MongoDB:", err);
-        connectionStatus = "Error";
+        connectionStatus = "error";
         throw err;
     }
 };
@@ -19,6 +19,7 @@ const dbConnect = async () => {
 export const checkConnectionStatus = () => {
     return connectionStatus;
     //to check connectionStatus 
+    //Returns either error or running
 };
 
 export default dbConnect;

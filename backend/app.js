@@ -63,7 +63,10 @@ app.get("/", (req, res) => {
 })
 
 //import routes : add here 
+import healthCheckRoute from "./routes/healthCheck.route.js";
 
+
+app.use("/api/v1/health-check", healthCheckRoute);
 
 
 
