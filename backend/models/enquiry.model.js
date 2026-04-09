@@ -14,7 +14,9 @@ const enquirySchema = new Schema({
         required: [true, "Email is required"],
         match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
         lowercase: true,
-        trim: true   
+        trim: true,
+        minLength: 5,
+        maxLength: 50, 
     },
     mobileNumber: {
         type: String,
@@ -27,6 +29,7 @@ const enquirySchema = new Schema({
     bookingType:{
         type: String,
         enum: ['destinationWedding', 'birthdayCelebration', 'kittyParty', 'corporateMeetings', 'schoolTrip', 'collegeEvent', 'culturalEvent', 'other'],
+        default: 'other',
         required: true,
         index: true, //to search by destination weddings and all
     },
@@ -34,12 +37,12 @@ const enquirySchema = new Schema({
         type: String,
         required: [true, "Message is required"],
         trim: true,
-        minLength: [10, "Message must be at least 10 characters long"],
+        minLength: [2, "Message must be at least 2 characters long"],
         maxLength: [1000, "Message must be at most 1000 characters long"]
     },
     status: {
         type: String,
-        enum: ['pending', 'reviewed', 'contacted', 'closed'],
+        enum: ['pending', 'contacted', 'closed'],
         default: 'pending',
         index: true
     },

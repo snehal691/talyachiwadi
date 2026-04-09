@@ -1,21 +1,16 @@
 import { checkConnectionStatus } from "../db/dbConnect.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-export const healthCheck = (req, res) => {
+export const healthCheck = asyncHandler(async (req, res) => {
     let connectionStatus = checkConnectionStatus();
 
     console.log({connectionStatus});
 
     if(connectionStatus !== "running"){
-        return res.status(500).json({
-            message: "DB connection error", 
-            data: `Not Healthy`,
-            success: false
-        })
+        throw new ApiError(500, "DB connection error");
     }
 
-    return res.status(200).json({
-        message: "DB connection success",
-        data: `Healthy`,
-        success: true
-    })
-}
+    return res.json(new ApiResponse(200, "ok", "Healthy"));
+})

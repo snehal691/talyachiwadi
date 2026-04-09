@@ -64,9 +64,11 @@ app.get("/", (req, res) => {
 
 //import routes : add here 
 import healthCheckRoute from "./routes/healthCheck.route.js";
+import enquiryRoute from "./routes/enquiry.route.js";
 
 
 app.use("/api/v1/health-check", healthCheckRoute);
+app.use("/api/v1/enquiry", enquiryRoute);
 
 
 
