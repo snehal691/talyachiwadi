@@ -71,5 +71,42 @@ app.use("/api/v1/health-check", healthCheckRoute);
 app.use("/api/v1/enquiry", enquiryRoute);
 
 
+//global error handler
+app.use((err, req, res, next) => {
+  const statusCode = Number.isInteger(err?.statusCode) ? err.statusCode : 500;
+
+  // Mongoose cast error (invalid ObjectId etc.)
+  if (err?.name === "CastError") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid request data",
+      errors: [err.message],
+    });
+  }
+
+  // Mongoose validation error
+  if (err?.name === "ValidationError") {
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors: Object.values(err.errors || {}).map((e) => e.message),
+    });
+  }
+
+  // Zod validation error
+  if (err?.name === "ZodError") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid form data",
+      errors: err.issues?.map((i) => `${i.path.join(".")}: ${i.message}`) || [],
+    });
+  }
+
+  return res.status(statusCode).json({
+    success: false,
+    message: err?.message || "Internal Server Error",
+    errors: Array.isArray(err?.errors) ? err.errors : [],
+  });
+});
 
 export default app;

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-
+import aggregratePaginate from "mongoose-aggregate-paginate-v2"
 
 const enquirySchema = new Schema({
     fullName: {
@@ -56,6 +56,7 @@ const enquirySchema = new Schema({
 })
 
 enquirySchema.index({email: 1, createdAt: -1});
+enquirySchema.plugin(aggregratePaginate)
 
 
 

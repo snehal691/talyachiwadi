@@ -7,8 +7,6 @@ const router = express.Router();
 router.post("/", createEnquiry);
 
 
-
-
 // TO-DO: add auth middleware
 //protected routes 
 router.get("/", getAllEnquiry);
