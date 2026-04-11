@@ -19,6 +19,7 @@ const adminSchema = new Schema({
         max: 20
     },
     //either admin or user
+    //user is added for future update by developer
     role: {
         type: String,
         enum: ['admin', 'user', 'developer'],

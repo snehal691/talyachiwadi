@@ -62,18 +62,14 @@ export const loginAdmin = asyncHandler(async (req, res) => {
     console.log({ accessToken, refreshToken })
 
     user.setRefreshToken(refreshToken);
+    
     await user.save({ validateBeforeSave: false });
 
     console.log("new user", user);
 
-    let secure = false
-    if(process.env.ENVIRONMENT === "PROD"){
-       secure =  true
-    } 
-
     const options = {
         httpOnly: true,
-        secure,
+        secure: process.env.ENVIRONMENT === "PROD" ? true : false, 
         sameSite: "none",
         path: "/"
     };
