@@ -684,7 +684,7 @@ pnpm add bcryptjs jsonwebtoken razorpay nodemailer
 | Day | Date | Hours | Goal |
 |-----|------|-------|------|
 | **Day 1** | Mon, Apr 7 | 1.5h | `index.js` + `app.js` + `db/connect.js` → server starts & connects to MongoDB |
-| **Day 2** | Tue, Apr 8 | 1.5h | All 3 models — `Admin.js`, `Booking.js`, `Enquiry.js` |
+| **Day 2** | Tue, Apr 8 | 1.5h | All 3 models — `Admin.js`, `Booking.js`, `Enquiry.js`, `Setting,js` | 
 | **Day 3** | Wed, Apr 9 | 1.5h | Auth — `auth.controller.js` + `protect.js` + `auth.routes.js` + seed admin |
 | **Day 4** | Thu, Apr 10 | 1.5h | Razorpay — `booking.controller.js` + `booking.routes.js` |
 | **Day 5** | Fri, Apr 11 | 1.5h | Enquiry route + all Admin CRUD routes (protected) |
@@ -695,3 +695,343 @@ pnpm add bcryptjs jsonwebtoken razorpay nodemailer
 | **Day 10** | Wed, Apr 16 | 1.5h | End-to-end test everything + fix bugs + **done ✅** |
 
 ---
+
+
+| Day | Goal | Hours | Details |
+|-----|------|-------|---------|
+| **Day 1** | Foundation & Database Connection | ✅ Done | `index.js` + `app.js` + `db/connect.js` → server starts & connects to MongoDB |
+| **Day 2** | Database Models | ✅ Done | All 3 models — `Admin.js`, `Booking.js`, `Enquiry.js` |
+| **Day 3** | Admin Auth | 1.5h | Auth — `auth.controller.js` + `protect.js` + `auth.routes.js` + seed admin |
+| **Day 4** | Booking + Razorpay Flow | 1.5h | Razorpay — `booking.controller.js` + `booking.routes.js` |
+| **Day 5** | Enquiry Form + Admin CRUD Routes | 1.5h | Enquiry route + all Admin CRUD routes (protected) |
+| **Day 6** | Test API + React Admin Panel | 5–6h 💪 | Test ALL API routes with Thunder Client, fix bugs + **React Admin Panel** — setup Vite + Login page + Bookings table + Enquiries table |
+| **Day 7** | Wire Frontend + Final Testing | 3h | Wire `index.html` booking form → backend + Razorpay popup, wire `events.html` enquiry form → backend, end-to-end test everything + fix bugs + **done ✅** |
+
+
+
+
+```markdown
+# Settings System Setup Guide
+
+## Overview
+This guide explains how to create a **Settings Model** and connect it to the booking system so clients can manage booking parameters (rooms, pricing, capacity, blackout dates) via admin panel.
+
+---
+
+## Step 1: Create Settings Model
+
+**File:** `backend/models/settings.model.js`
+
+```js
+import mongoose, { Schema } from "mongoose";
+
+const settingsSchema = new Schema({
+    // Basic property information
+    totalRooms: {
+        type: Number,
+        required: true,
+        default: 1,
+        min: 1
+    },
+    
+    // Pricing
+    pricePerNight: {
+        type: Number,
+        required: true,
+        default: 5000, // in INR paise (so 5000 = ₹50)
+        min: 0
+    },
+    
+    // Guest capacity
+    maxGuestsPerBooking: {
+        type: Number,
+        required: true,
+        default: 10,
+        min: 1
+    },
+    
+    guestCapacityPerRoom: {
+        type: Number,
+        required: true,
+        default: 2,
+        min: 1
+    },
+    
+    // Stay duration constraints
+    minStayDays: {
+        type: Number,
+        required: true,
+        default: 1,
+        min: 1
+    },
+    
+    maxStayDays: {
+        type: Number,
+        required: true,
+        default: 30,
+        min: 1
+    },
+    
+    // Currency
+    currency: {
+        type: String,
+        default: "INR",
+        immutable: true
+    },
+    
+    // Blackout dates - dates when no bookings allowed
+    blackoutDates: [{
+        type: Date
+    }],
+    
+    // Timestamps
+}, { timestamps: true });
+
+// Export model
+export const Settings = mongoose.model("Settings", settingsSchema);
+```
+
+---
+
+## Step 2: Create Settings Admin Routes
+
+**File:** `backend/routes/admin.routes.js` (Add these routes)
+
+```js
+// Add these imports at the top
+import { getSettings, updateSettings } from '../controllers/admin.controller.js';
+
+// Add these routes inside your admin router (before the export)
+router.get('/settings', protect, getSettings);
+router.put('/settings', protect, updateSettings);
+
+// Full example structure:
+/*
+const router = Router();
+router.use(protect); // All admin routes protected
+
+// Existing routes...
+router.get('/bookings', getAllBookings);
+router.put('/bookings/:id/status', updateBookingStatus);
+
+// NEW Settings routes
+router.get('/settings', getSettings);
+router.put('/settings', updateSettings);
+
+export default router;
+*/
+```
+
+---
+
+## Step 3: Add Controller Methods
+
+**File:** `backend/controllers/admin.controller.js` (Add these functions)
+
+```js
+import { Settings } from '../models/settings.model.js';
+
+// Get current settings
+export const getSettings = async (req, res) => {
+    try {
+        let settings = await Settings.findOne();
+        
+        // If no settings exist, create default ones
+        if (!settings) {
+            settings = await Settings.create({});
+        }
+        
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update settings
+export const updateSettings = async (req, res) => {
+    try {
+        const { totalRooms, pricePerNight, maxGuestsPerBooking, maxStayDays, minStayDays, guestCapacityPerRoom, blackoutDates } = req.body;
+        
+        // Validate inputs
+        if (pricePerNight && pricePerNight < 0) {
+            return res.status(400).json({ message: "Price cannot be negative" });
+        }
+        
+        if (maxStayDays && minStayDays && maxStayDays < minStayDays) {
+            return res.status(400).json({ message: "Max stay must be >= min stay" });
+        }
+        
+        // Update or create settings
+        let settings = await Settings.findOne();
+        
+        if (!settings) {
+            settings = await Settings.create(req.body);
+        } else {
+            settings = await Settings.findByIdAndUpdate(
+                settings._id,
+                req.body,
+                { new: true, runValidators: true }
+            );
+        }
+        
+        res.json({ message: "Settings updated successfully", settings });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+```
+
+---
+
+## Step 4: Connect Settings to Booking Controller
+
+**File:** `backend/controllers/booking.controller.js` (Modify createOrder function)
+
+```js
+import { Settings } from '../models/settings.model.js';
+import { Booking } from '../models/booking.model.js';
+
+export const createOrder = async (req, res) => {
+    try {
+        const { fullName, email, mobileNumber, checkIn, checkOut, guestCount, bookingType } = req.body;
+        
+        // Step 1: Fetch current settings
+        const settings = await Settings.findOne();
+        if (!settings) {
+            return res.status(500).json({ message: "Booking settings not configured. Please contact admin." });
+        }
+        
+        // Step 2: Validate booking against settings
+        
+        // Check 1: Guest count validation
+        if (guestCount > settings.maxGuestsPerBooking) {
+            return res.status(400).json({ 
+                message: `Maximum ${settings.maxGuestsPerBooking} guests allowed` 
+            });
+        }
+        
+        // Check 2: Stay duration validation
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const numberOfNights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+        
+        if (numberOfNights < settings.minStayDays) {
+            return res.status(400).json({ 
+                message: `Minimum stay is ${settings.minStayDays} nights` 
+            });
+        }
+        
+        if (numberOfNights > settings.maxStayDays) {
+            return res.status(400).json({ 
+                message: `Maximum stay is ${settings.maxStayDays} nights` 
+            });
+        }
+        
+        // Check 3: Blackout dates validation
+        const isBlackoutDate = settings.blackoutDates.some(date => {
+            const blackoutDate = new Date(date);
+            return blackoutDate >= checkInDate && blackoutDate <= checkOutDate;
+        });
+        
+        if (isBlackoutDate) {
+            return res.status(400).json({ 
+                message: "Selected dates are not available (blackout period)" 
+            });
+        }
+        
+        // Step 3: Calculate total amount based on settings
+        const totalAmount = settings.pricePerNight * numberOfNights;
+        
+        // Step 4: Create booking with settings-based amount
+        const bookingData = {
+            fullName,
+            email,
+            mobileNumber,
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            guestCount,
+            bookingType,
+            totalAmount
+        };
+        
+        const booking = await Booking.create(bookingData);
+        
+        // Step 5: Create Razorpay order
+        // ... (rest of Razorpay logic remains same)
+        
+        res.json({ 
+            message: "Booking created successfully",
+            booking,
+            totalAmount 
+        });
+        
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+```
+
+---
+
+## Step 5: Usage Flow
+
+### Admin Updates Settings (via admin panel):
+```
+Admin Panel → Settings Form
+↓
+Fill: totalRooms: 5, pricePerNight: 5000, maxGuestsPerBooking: 10, minStayDays: 1, maxStayDays: 30
+↓
+PUT /api/admin/settings (with data above)
+↓
+Settings saved in MongoDB
+```
+
+### User Books Room:
+
+```
+User fills booking form → checkIn, checkOut, guestCount
+↓
+Frontend calls POST /api/bookings/create-order
+↓
+Backend fetches settings from DB
+↓
+Validates: guestCount (5) <= maxGuestsPerBooking (10) ✓
+Validates: nights (3) <= maxStayDays (30) ✓
+Validates: dates not in blackoutDates ✓
+↓
+Calculates: totalAmount = 5000 × 3 = 15000
+↓
+Creates Razorpay order with amount: 15000
+↓
+Returns orderId to frontend
+```
+
+---
+
+## Testing Checklist
+
+- [ ] Create Settings model file
+- [ ] Create default settings document in MongoDB (run seed script)
+- [ ] Test GET /api/admin/settings (should return current settings)
+- [ ] Test PUT /api/admin/settings (update a field like pricePerNight)
+- [ ] Test POST /api/bookings/create-order with different guest counts
+- [ ] Verify booking validation works (too many guests, invalid dates, etc.)
+- [ ] Verify pricing is calculated correctly from settings
+
+---
+
+## Next Steps
+
+1. **Create the Settings model** (`settings.model.js`)
+2. **Add the controller methods** to `admin.controller.js`
+3. **Add the routes** to `admin.routes.js`
+4. **Update the booking controller** to use settings
+5. **Create a seed script** to initialize default settings
+6. **Build React admin panel** for settings management (SettingsPage.jsx)
+```
+
+---
+
+Just copy this entire markdown content and save it as `backend/SETTINGS-SETUP.md` in your project. Then you can follow it step-by-step! 📝---
+
+Just copy this entire markdown content and save it as `backend/SETTINGS-SETUP.md` in your project. Then you can follow it step-by-step! 📝

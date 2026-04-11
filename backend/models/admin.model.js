@@ -30,7 +30,7 @@ const adminSchema = new Schema({
         required: [true, "Password is required"],
         trim: true,
         minLength: 8,
-        maxLength: 20,
+        maxLength: 30,
     },
     refreshToken: {
         type: String
@@ -52,7 +52,6 @@ adminSchema.pre("save", async function (next) {
 
 adminSchema.methods.comparePassword = async function (password) {
     return await bcrypt.compare(password, this.password);
-    //returns true or false 
 }
 
 
@@ -75,14 +74,18 @@ adminSchema.methods.generateAccessToken = function () {
 adminSchema.methods.generateRefreshToken = function () {
      return jwt.sign(
         {
-            _id: this._id,
-            
+            _id: this._id,      
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
     )
+}
+
+adminSchema.methods.setRefreshToken = function (refreshToken) {
+    this.refreshToken = refreshToken;
+    return this;
 }
 
 

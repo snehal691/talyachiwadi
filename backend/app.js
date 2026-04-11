@@ -1,23 +1,23 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 
-//TO-DO : ADD ALLOWED HEADERS HERE (BASEURL AND PROD_URL)
-//TO-DO : ADD CORS HERE
+//TO-DO : ADD Allowed CORS HERE
 
-/* 
-const allowedHeaders =[
+const origins =[
 process.env.BASE_DEV_URL,
-process.env.BASE_PROD_URL,
+// process.env.BASE_PROD_URL,
 ]
+
 
 app.use(
   cors({
-      origin: allowedHeaders,
+      origin: origins,
       credentials: true,
       methods: ["GET", "POST", "DELETE", "OPTIONS"], //allowed requests methods
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -25,7 +25,7 @@ app.use(
 );
 
 
-*/
+
 
 
 
@@ -65,10 +65,12 @@ app.get("/", (req, res) => {
 //import routes : add here 
 import healthCheckRoute from "./routes/healthCheck.route.js";
 import enquiryRoute from "./routes/enquiry.route.js";
+import authRoute from "./routes/auth.route.js";
 
 
 app.use("/api/v1/health-check", healthCheckRoute);
 app.use("/api/v1/enquiry", enquiryRoute);
+app.use("/api/v1/auth", authRoute);
 
 
 //global error handler
