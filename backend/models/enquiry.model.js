@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import aggregratePaginate from "mongoose-aggregate-paginate-v2"
+import aggregatePaginate from "mongoose-aggregate-paginate-v2"
 
 const enquirySchema = new Schema({
     fullName: {
@@ -20,7 +20,7 @@ const enquirySchema = new Schema({
     },
     mobileNumber: {
         type: String,
-        match: [/^[0-9]{10,15}$/, "Please enter a valid mobile number"],
+        match: [/^[0-9]{10,20}$/, "Please enter a valid mobile number"],
         required: [true, "Mobile number is required"],
         trim: true,
         minLength: 10,
@@ -56,7 +56,7 @@ const enquirySchema = new Schema({
 })
 
 enquirySchema.index({email: 1, createdAt: -1});
-enquirySchema.plugin(aggregratePaginate)
+enquirySchema.plugin(aggregatePaginate)
 
 
 

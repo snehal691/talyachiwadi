@@ -32,9 +32,11 @@ const adminSchema = new Schema({
         trim: true,
         minLength: 8,
         maxLength: 30,
+        select: false
     },
     refreshToken: {
-        type: String
+        type: String,
+        select: false
     }
 }, {
     timestamps: true
@@ -48,6 +50,7 @@ adminSchema.pre("save", async function (next) {
         next();
     } catch (error) {
         console.error("Error while hashing password:", error);
+        next(error);
     }
 })
 
@@ -89,6 +92,23 @@ adminSchema.methods.setRefreshToken = function (refreshToken) {
     return this;
 }
 
+adminSchema.set("toJSON", {
+    transform(doc, ret) {
+        delete ret.password;
+        delete ret.refreshToken;
+        delete ret.__v;
+        return ret;
+    },
+});
+
+adminSchema.set("toObject", {
+    transform(doc, ret) {
+        delete ret.password;
+        delete ret.refreshToken;
+        delete ret.__v;
+        return ret;
+    },
+});
 
 export const Admin = mongoose.model("Admin", adminSchema);
 

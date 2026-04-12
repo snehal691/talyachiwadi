@@ -41,7 +41,7 @@ export const createEnquiry = asyncHandler(async (req, res) => {
 
     
     if (!parseResult.success) {
-        throw new ApiError(400, parseResult.error.message[0]?.message || "Invalid form data");
+        throw new ApiError(400, parseResult.error.issues[0]?.message || "Invalid form data");
     }
 
     //save enquiryForm in database

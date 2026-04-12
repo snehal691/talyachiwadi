@@ -25,7 +25,7 @@ const settingsSchema = new Schema({
         type: Number,
         required: true,
         default: 4,
-        min: 0,
+        min: 1,
     },
     couplePackagePerNight: {
         type: Number,
@@ -36,7 +36,7 @@ const settingsSchema = new Schema({
     extraPersonRate: {
         type: Number,
         required: true,
-        default: 1000,
+        default: 100000, //1k per night in paisa
         min: 0,
     },
     kidBelow5Rate: {

@@ -31,26 +31,21 @@ const bookingSchema = new Schema({
     },
     bookingType: {
         type: String,
-        enum: ['stay', 'destinationWedding', 'corporateEvents', 'other'],
-        default: 'other',
+        enum: ['deluxeRoom', 'coupleTent', 'groupTent', 'other', 'couplePackage'],
+        default: 'deluxeRoom',
         required: true,
-    },
-
-    //For cron job confirmation
+        index: true,
+    },    
+    settingsId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Settings',
+    },    
+    //for cron job
     isConfirmationSent: {
         type: Boolean,
         default: false,
-        index: true // for efficient cron job queries on unsent confirmations
+        index: true,
     },
-    /*
-    //TO-DO : add check in and checkout date -> done
-    //? TO-DO: add guest count -> done 
-    // TO- DO: razorpay payment gateway models here  -> done 
-    //TO-DO : add payment details (e.g., totalAmount, paymentStatus enum ['pending', 'paid', 'failed']).
-    //No. of guests=>
-    */
-
-    //TO-DO : Review this code from this to end
     checkIn: {
         type: Date,
         required: true,
@@ -60,89 +55,173 @@ const bookingSchema = new Schema({
         required: true,
         validate: {
             validator(value) {
-                if(!value || !this.checkIn) return true;
+                if (!value || !this.checkIn) return true;
                 return value > this.checkIn;
             },
             message: "Check-out date must be after check-in date.",
         },
     },
-    guestCount: {
+    nights: {
         type: Number,
-        required: false,
-        default: 1,
+        required: true,
+        min: 1,
+        validate: {
+            validator(value) {
+                if (!value || !this.checkIn || !this.checkOut) return true;
+                const msPerDay = 1000 * 60 * 60 * 24;
+                return value = Math.round((this.checkOut - this.checkIn) / msPerDay);
+            },
+            message: "Check-out date must be after check-in date.",
+        }
+    },
+    guestsTotal: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 4,
+    },
+    adults: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0,
+    },
+    kidsBelow5: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0,
+    },
+    kids5to10: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0,
+    },
+    pricingSnapshot: {
+        baseRate: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+        extraAdultRate: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+        kidBelow5Rate: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+        kid5to10Rate: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+        coupleTentRate: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+        groupTentRate: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+        currency: {
+            type: String,
+            required: true,
+            default: "INR",
+        },
+    },
+    baseAmount: {
+        type: Number,
+        required: true,
+        min: 0,
+    },
+    extrasAmount: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0,
     },
     totalAmount: {
-        type: Number, //in paisas
+        type: Number,
         required: true,
-        min: 100,
+        min: 0,
     },
-    paymentDetails: {
-        type: String,
-        enum: ["online", "offline"],
-        default: "online",
-        //mostly it will be online 
+    onlinePayableAmount: {
+        type: Number,
+        required: function() {
+            return this.paymentMode === 'online';
+        },
+        min: 0,
+        default: 0,
     },
-
-    //RAZORPAY
-    currency: {
+    amountDueAtProperty: {
+        type: Number,
+        required: function() {
+            return this.paymentMode === 'cash_on_arrival';
+        },
+        min: 0,
+        default: 0,
+    },
+    paymentMode: {
         type: String,
+        enum: ['online', 'cash_on_arrival'],
+        default: 'online',
         required: true,
-        default: "INR"
     },
-    transactionDate: {
-        type: Date,
-        default: Date.now //date of transaction
-    },
-    razorpay_order_id: {
+    bookingStatus: {
         type: String,
-        required: true,
-        trim: true,
-        unique: true
-    },
-    razorpay_payment_id: {
-        type: String,
-        required: true,
-        trim: true,
-        unique: true
-    },
-    razorpay_signature: {
-        type: String,
-        required: true,
-        trim: true
+        enum: ['pending', 'confirmed', 'cancelled', 'completed'],
+        default: 'pending',
     },
     paymentStatus: {
         type: String,
-        enum: ["created", "authorized", "captured", "failed", "refund"],
-        default: "created"
+        enum: ['pending', 'paid', 'failed', 'refunded'],
+        default: 'pending',
     },
-    paymentMethod: {
+    latestRazorpayTxnId: {
+        type: Schema.Types.ObjectId,
+        ref: 'RazorpayTransaction',
+
+    },
+    currency: {
         type: String,
-        enum: ["upi", "card", "netbanking", "wallet"],
-        default: "upi"
-    },
-    receiptGenerated: {
-        type: Boolean,
-        default: false
-    },
-    receiptUrl: {
-        type: String,
-        trim: true
+        required: true,
+        default: "INR",
     },
 }, {
-    timestamps: true
+    timestamps: true,
+});
+
+bookingSchema.index({ email: 1, fullName: 1, createdAt: -1 });
+bookingSchema.index({ paymentStatus: 1, bookingStatus: 1, createdAt: -1 });
+bookingSchema.index({ checkIn: 1, checkOut: 1, createdAt: -1 });
+bookingSchema.index({ latestRazorpayTxnId: 1 }, { sparse: true });
+
+
+//validate the pre save 
+bookingSchema.pre("validate", function (next) {
+  if (this.paymentMode === "online") {
+    if (!this.onlinePayableAmount || this.onlinePayableAmount <= 0) {
+      this.invalidate("onlinePayableAmount", "Online payable amount must be greater than 0");
+    }
+    this.amountDueAtProperty = 0;
+  }
+
+  if (this.paymentMode === "cash_on_arrival") {
+    if (!this.amountDueAtProperty || this.amountDueAtProperty <= 0) {
+      this.invalidate("amountDueAtProperty", "Amount due at property must be greater than 0");
+    }
+    this.onlinePayableAmount = 0;
+  }
+
+  next();
 });
 
 
-// checkIn must be before checkOut; schema validator handles this now
 
-bookingSchema.index({ email: 1, fullName: 1, createdAt: -1, });
-bookingSchema.index({ paymentStatus: 1, createdAt: -1 });
-bookingSchema.index({ checkIn: 1, checkOut: 1, createdAt: -1 });
-
-//You can also add razorpay methods here 
-
-
-
-//add razorpay methods here
 export const Booking = mongoose.model("Booking", bookingSchema);
-

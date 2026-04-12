@@ -57,7 +57,7 @@ export const loginAdmin = asyncHandler(async (req, res) => {
                     { email: usernameOrEmail }
                 ]
             }
-        );
+        ).select("+password");
 
     console.log({ user })
 
