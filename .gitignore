@@ -52,3 +52,5 @@ out/
 *.sln
 *.sw?
 .DS_Store
+
+*plan-totalWorkPending.prompt.md

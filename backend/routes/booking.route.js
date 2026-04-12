@@ -5,6 +5,7 @@ import {
   getAllBookings,
   getBookingById,
   updateBookingStatus,
+  quotation
 } from "../controllers/booking.controller.js";
 import { verifyJWT } from "../middleware/verifyJWT.js";
 import { isAdmin } from "../middleware/isAdmin.js";
@@ -12,6 +13,7 @@ import { isAdmin } from "../middleware/isAdmin.js";
 const router = express.Router();
 
 // Public booking endpoints
+router.post("/quotation", quotation);
 router.post("/create-order", createBooking);
 router.post("/verify-payment", verifyBookingPayment);
 

@@ -13,7 +13,7 @@ const loginCredentialsSchema = z.object({
 })
 
 const createAdminSchema = z.object({
-    email: z.email().optional().trim(),
+    email: z.email().optional(),
     username: z.string()
         .min(2, "Username must be at least 2 characters")
         .max(20, "Username must be at most 20 characters"),
