@@ -8,8 +8,25 @@ import { z } from "zod";
 const loginCredentialsSchema = z.object({
     usernameOrEmail: z.string().or(z.email()),
     password: z.string()
-                .min(8, "Password must be at least 8 characters")
-                .max(30, "Password must be at most 30 characters")
+        .min(8, "Password must be at least 8 characters")
+        .max(30, "Password must be at most 30 characters")
+})
+
+const createAdminSchema = z.object({
+    email: z.email().optional().trim(),
+    username: z.string()
+        .min(2, "Username must be at least 2 characters")
+        .max(20, "Username must be at most 20 characters"),
+    role: z.enum(['admin', 'user', 'developer']).default('user'),
+    password: z.string()
+        .min(8, "Password must be at least 8 characters")
+        .max(30, "Password must be at most 30 characters"),
+    confirmPassword: z.string()
+        .min(8, "Password must be at least 8 characters")
+        .max(30, "Password must be at most 30 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords must match",
 })
 
 export const loginAdmin = asyncHandler(async (req, res) => {
@@ -33,12 +50,14 @@ export const loginAdmin = asyncHandler(async (req, res) => {
 
     //since we are accepting both email or username but mostly it will be admin like that only 
     const user = await Admin
-                    .findOne(
-                        { $or: [
-                            { username: usernameOrEmail },
-                            { email: usernameOrEmail }
-                        ]}
-                    ); 
+        .findOne(
+            {
+                $or: [
+                    { username: usernameOrEmail },
+                    { email: usernameOrEmail }
+                ]
+            }
+        );
 
     console.log({ user })
 
@@ -62,14 +81,14 @@ export const loginAdmin = asyncHandler(async (req, res) => {
     console.log({ accessToken, refreshToken })
 
     user.setRefreshToken(refreshToken);
-    
+
     await user.save({ validateBeforeSave: false });
 
     console.log("new user", user);
 
     const options = {
         httpOnly: true,
-        secure: process.env.ENVIRONMENT === "PROD" ? true : false, 
+        secure: process.env.ENVIRONMENT === "PROD" ? true : false,
         sameSite: "none",
         path: "/"
     };
@@ -109,14 +128,14 @@ export const loginAdmin = asyncHandler(async (req, res) => {
 export const refreshAccessToken = asyncHandler(async (req, res) => {
     //get id and access token from cookie
 
-    const body = req.body;
+    // const body = req.body;
 
     //do i need body here or not
-    console.log({ body })
+    // console.log({ body })
 
     const refreshToken = req.cookies?.refreshToken;
 
-    console.log({refreshToken });
+    console.log({ refreshToken });
 
     if (!refreshToken) {
         throw new ApiError(401, "Refresh Token not found");
@@ -125,7 +144,6 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     const user = await Admin.findOne({ refreshToken });
 
     if (!user) {
-        //to-do add log for this type of events (for security)
         throw new ApiError(400, "Invalid User");
     }
 
@@ -184,7 +202,7 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true,
+        secure: process.env.ENVIRONMENT === "PROD",
         sameSite: "none",
         path: "/"
     };
@@ -200,3 +218,48 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
 //forgot password for that we gonna need some 
 //add user in future 
 // export const 
+
+export const createAdmin = asyncHandler(async (req, res) => {
+    //take body
+    //see if admin exists if it exists then throw error
+    //create admin
+    //send response
+
+    const body = req.body;
+
+    if (!body || Object.keys(body).length === 0) {
+        throw new ApiError(400, "Invalid form data")
+    }
+
+    const parseResult = createAdminSchema.safeParse(body);
+
+    if (!parseResult.success) {
+        throw new ApiError(400, parseResult.error.message[0]?.message || "Invalid form data");
+    }
+
+    const existingAdmin = await Admin.findOne({ username: parseResult.data.username });
+
+    if (existingAdmin) {
+        throw new ApiError(400, "Admin already exists");
+    }
+
+    const admin = await Admin.create(parseResult.data);
+
+    if (!admin) {
+        throw new ApiError(500, "Error while creating admin");
+    }
+
+    const result = admin.toObject();
+    delete result?.password;
+    delete result?.__v;
+    delete result?.refreshToken;
+
+
+    return res.status(201)
+        .json(new ApiResponse(
+            201,
+            result,
+            "Admin created successfully"
+        ));
+
+})

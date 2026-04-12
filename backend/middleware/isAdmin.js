@@ -12,8 +12,8 @@ export const isAdmin = asyncHandler(async (req, res, next) => {
         const accessToken = req?.cookies?.accessToken
 
         try {
-            newAdmin = await jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
-
+            newAdmin = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+            
         } catch (error) {
             throw new ApiError(401, "Unauthorized: Access token missing");
         }
