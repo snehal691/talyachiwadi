@@ -5,7 +5,8 @@ import { isAdmin } from "../middleware/isAdmin.js";
 
 const router = express.Router();
 
+//Admin Settings Endpoints
 router.get("/", verifyJWT, isAdmin, getSettings);
-router.put("/", verifyJWT, isAdmin, updateSettings);
+router.patch("/", verifyJWT, isAdmin, updateSettings);
 
 export default router;

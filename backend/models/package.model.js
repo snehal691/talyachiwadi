@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { minLength } from "zod";
 
 const packageSchema = new Schema({
     name: {
@@ -13,12 +14,13 @@ const packageSchema = new Schema({
         unique: true,
         required: true,
         trim: true,
+        minLength: 2,
         maxLength: 100,
         lowercase: true
     },
     category: {
         type: String,
-        enum: ["tent", "room"],
+        enum: ["tent", "room", "other"],
         required: true,
         index: true
     },

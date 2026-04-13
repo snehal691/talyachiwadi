@@ -67,14 +67,14 @@ import healthCheckRoute from "./routes/healthCheck.route.js";
 import enquiryRoute from "./routes/enquiry.route.js";
 import authRoute from "./routes/auth.route.js";
 import bookingRoute from "./routes/booking.route.js";
-import settingsRoute from "./routes/settings.route.js";
+import settingRoute from "./routes/setting.route.js";
 
 
 app.use("/api/v1/health-check", healthCheckRoute);
 app.use("/api/v1/enquiry", enquiryRoute);
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/bookings", bookingRoute);
-app.use("/api/v1/admin/settings", settingsRoute);
+app.use("/api/v1/admin/settings", settingRoute);
 
 
 //global error handler
